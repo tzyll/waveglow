@@ -174,7 +174,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', type=str, required=True,
                         help='JSON file for configuration')
-    parser.add_argument('-s', '--stdout_dir', type=str, default=".",
+    parser.add_argument('-s', '--stdout_dir', type=str, default="GPU_log",
                         help='directory to save stoud logs')
     parser.add_argument(
         '-a', '--args_str', type=str, default='',

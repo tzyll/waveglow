@@ -1,6 +1,45 @@
-![WaveGlow](waveglow_logo.png "WaveGLow")
+## Generative flow for speech study based on WaveGlow
 
-## WaveGlow: a Flow-based Generative Network for Speech Synthesis
+### Setup
+
+0. Conda env with [Anaconda](https://www.anaconda.com/download) is recommended, such as
+
+   ```command
+   conda create -n glow python=3.7
+   conda activate glow
+   ```
+
+1. Clone the repo and initialize submodule
+
+   ```command
+   git clone https://github.com/tzyll/waveglow.git
+   cd waveglow
+   git submodule init
+   git submodule update
+   ```
+
+2. Install requirements `pip install -r requirements.txt`
+
+3. Install [Apex] (specify CUDA_PATH with version 9.0 if PyTorch is installed with requirements.txt)
+
+### Experiments
+
+1. Prepare wav.scp for "training_files" in config.json with format 'wav_id wav_path',
+   also a test.scp for test.
+
+2. Train a glow for raw audio without condition.
+
+   ```command
+   ./run_train.sh     # run_distributed.sh for multi GPUs.
+   ./run_forward.sh   # get latent *z*.
+   ./run_generate.sh  # generate wavs with the above *z*.
+   ```
+
+<br/>
+
+Following is the introduction of [WaveGlow](https://github.com/NVIDIA/waveglow).
+
+### WaveGlow: a Flow-based Generative Network for Speech Synthesis
 
 ### Ryan Prenger, Rafael Valle, and Bryan Catanzaro
 

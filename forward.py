@@ -27,12 +27,13 @@
 import os
 from scipy.io.wavfile import write
 import torch
-from mel2samp import scp_files_to_list, MAX_WAV_VALUE
+from mel2samp import scp_files_to_list, MAX_WAV_VALUE, load_wav_to_torch
 from denoiser import Denoiser
+import matplotlib.pyplot as plt
 
 
 def main(wav_scp, waveglow_path, sigma, output_dir, sampling_rate, is_fp16,
-         denoiser_strength, z_dir):
+         denoiser_strength):
     wav_scp = scp_files_to_list(wav_scp)
     waveglow = torch.load(waveglow_path)['model']
     waveglow = waveglow.remove_weightnorm(waveglow)
@@ -44,24 +45,25 @@ def main(wav_scp, waveglow_path, sigma, output_dir, sampling_rate, is_fp16,
     if denoiser_strength > 0:
         denoiser = Denoiser(waveglow).cuda()
 
+    z_all = []
     for _, file_scp in enumerate(wav_scp):
-        file_name, _ = file_scp
-        z_path = os.path.join(z_dir, "{}_z".format(file_name))
-        z = torch.load(z_path)
-        z = torch.autograd.Variable(z.cuda())
-        z = z.half() if is_fp16 else z
+        file_name, file_path = file_scp
+        audio, sampling_rate = load_wav_to_torch(file_path)
+        audio = torch.autograd.Variable(audio.cuda())
+        audio = torch.unsqueeze(audio, 0)
+        audio = audio / MAX_WAV_VALUE  # trained with norm
         with torch.no_grad():
-            audio = waveglow.infer(z, sigma=sigma)
-            if denoiser_strength > 0:
-                audio = denoiser(audio, denoiser_strength)
-            audio = audio * MAX_WAV_VALUE
-        audio = audio.squeeze()
-        audio = audio.cpu().numpy()
-        audio = audio.astype('int16')
-        audio_path = os.path.join(
-            output_dir, "{}_generate.wav".format(file_name))
-        write(audio_path, sampling_rate, audio)
-        print(audio_path)
+            z = waveglow.forward(audio)
+        z_path = os.path.join(output_dir, "{}_z".format(file_name))
+        torch.save(z[0], z_path)
+        print(z_path)
+        z_all.append(z[0])
+
+    z_all_a = torch.cat(z_all, 2)
+    plt.plot(z_all_a[0, 0, :].cpu().numpy(), z_all_a[0, 1, :].cpu().numpy(), 'r.')
+    z_fig_path = os.path.join(output_dir, "{}.jpg".format("z_dim-1-2"))
+    plt.savefig(z_fig_path)
+    print(z_fig_path)
 
 
 if __name__ == "__main__":
@@ -71,13 +73,12 @@ if __name__ == "__main__":
     parser.add_argument('-f', "--filelist_path", required=True)
     parser.add_argument('-w', '--waveglow_path',
                         help='Path to waveglow decoder checkpoint with model')
-    parser.add_argument('-o', "--output_dir", default="output_x")
+    parser.add_argument('-o', "--output_dir", default="output_z")
     parser.add_argument("-s", "--sigma", default=1.0, type=float)
     parser.add_argument("--sampling_rate", default=16000, type=int)
     parser.add_argument("--is_fp16", action="store_true")
     parser.add_argument("-d", "--denoiser_strength", default=0.0, type=float,
                         help='Removes model bias. Start with 0.1 and adjust')
-    parser.add_argument('-z', "--z_dir", default="output_z")
 
     args = parser.parse_args()
 
@@ -85,4 +86,4 @@ if __name__ == "__main__":
         os.makedirs(args.output_dir)
 
     main(args.filelist_path, args.waveglow_path, args.sigma, args.output_dir,
-         args.sampling_rate, args.is_fp16, args.denoiser_strength, args.z_dir)
+         args.sampling_rate, args.is_fp16, args.denoiser_strength)

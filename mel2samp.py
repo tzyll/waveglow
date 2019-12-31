@@ -49,6 +49,16 @@ def files_to_list(filename):
     files = [f.rstrip() for f in files]
     return files
 
+def scp_files_to_list(filename):
+    """
+    Takes a scp file with format 'wav_id wav_path'.
+    """
+    with open(filename, encoding='utf-8') as f:
+        files = f.readlines()
+
+    files = [f.strip().split() for f in files]
+    return files
+
 def load_wav_to_torch(full_path):
     """
     Loads wavdata into torch array
@@ -103,6 +113,39 @@ class Mel2Samp(torch.utils.data.Dataset):
         audio = audio / MAX_WAV_VALUE
 
         return (mel, audio)
+
+    def __len__(self):
+        return len(self.audio_files)
+
+class GetWavs(torch.utils.data.Dataset):
+    """
+    This is the main class that returns audio.
+    """
+    def __init__(self, training_files, segment_length, filter_length,
+                 hop_length, win_length, sampling_rate, mel_fmin, mel_fmax):
+        self.audio_files = scp_files_to_list(training_files)
+        random.seed(1234)
+        random.shuffle(self.audio_files)
+        self.sampling_rate = sampling_rate
+
+    def __getitem__(self, index):
+        # Read audio
+        _, filepath = self.audio_files[index]
+        audio, sampling_rate = load_wav_to_torch(filepath)
+        if sampling_rate != self.sampling_rate:
+            raise ValueError("{} SR doesn't match target {} SR".format(
+                sampling_rate, self.sampling_rate))
+
+        ## Take segment
+        #if audio.size(0) >= self.segment_length:
+        #    max_audio_start = audio.size(0) - self.segment_length
+        #    audio_start = random.randint(0, max_audio_start)
+        #    audio = audio[audio_start:audio_start+self.segment_length]
+        #else:
+        #    audio = torch.nn.functional.pad(audio, (0, self.segment_length - audio.size(0)), 'constant').data
+
+        audio = audio / MAX_WAV_VALUE
+        return audio
 
     def __len__(self):
         return len(self.audio_files)

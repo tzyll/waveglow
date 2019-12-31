@@ -1,20 +1,22 @@
 {
+    "comments": "raw audio, a whole audio as a sample, no condition",
+
     "train_config": {
         "fp16_run": true,
-        "output_directory": "checkpoints",
+        "output_directory": "checkpoints_raw-audio",
         "epochs": 100000,
         "learning_rate": 1e-4,
         "sigma": 1.0,
         "iters_per_checkpoint": 2000,
-        "batch_size": 12,
+        "batch_size": 1,
         "seed": 1234,
         "checkpoint_path": "",
-        "with_tensorboard": false
+        "with_tensorboard": true
     },
     "data_config": {
-        "training_files": "train_files.txt",
+        "training_files": "data_timit/train/wav.scp",
         "segment_length": 16000,
-        "sampling_rate": 22050,
+        "sampling_rate": 16000,
         "filter_length": 1024,
         "hop_length": 256,
         "win_length": 1024,
@@ -29,12 +31,12 @@
     "waveglow_config": {
         "n_mel_channels": 80,
         "n_flows": 12,
-        "n_group": 8,
+        "n_group": 40,
         "n_early_every": 4,
-        "n_early_size": 2,
+        "n_early_size": 10,
         "WN_config": {
-            "n_layers": 8,
-            "n_channels": 256,
+            "n_layers": 4,
+            "n_channels": 128,
             "kernel_size": 3
         }
     }

@@ -28,6 +28,7 @@ import argparse
 import json
 import os
 import torch
+import shutil
 
 #=====START: ADDED FOR DISTRIBUTED======
 from distributed import init_distributed, apply_gradient_allreduce, reduce_tensor
@@ -36,7 +37,7 @@ from torch.utils.data.distributed import DistributedSampler
 
 from torch.utils.data import DataLoader
 from glow import WaveGlow, WaveGlowLoss
-from mel2samp import Mel2Samp
+from mel2samp import GetWavs
 
 def load_checkpoint(checkpoint_path, model, optimizer):
     assert os.path.isfile(checkpoint_path)
@@ -90,7 +91,7 @@ def train(num_gpus, rank, group_name, output_directory, epochs, learning_rate,
                                                       optimizer)
         iteration += 1  # next iteration is iteration + 1
 
-    trainset = Mel2Samp(**data_config)
+    trainset = GetWavs(**data_config)
     # =====START: ADDED FOR DISTRIBUTED======
     train_sampler = DistributedSampler(trainset) if num_gpus > 1 else None
     # =====END:   ADDED FOR DISTRIBUTED======
@@ -119,10 +120,9 @@ def train(num_gpus, rank, group_name, output_directory, epochs, learning_rate,
         for i, batch in enumerate(train_loader):
             model.zero_grad()
 
-            mel, audio = batch
-            mel = torch.autograd.Variable(mel.cuda())
+            audio = batch
             audio = torch.autograd.Variable(audio.cuda())
-            outputs = model((mel, audio))
+            outputs = model(audio)
 
             loss = criterion(outputs)
             if num_gpus > 1:
@@ -172,6 +172,14 @@ if __name__ == "__main__":
     dist_config = config["dist_config"]
     global waveglow_config
     waveglow_config = config["waveglow_config"]
+
+    # Store config file.
+    if args.rank == 0:
+        output_directory = train_config["output_directory"]
+        if not os.path.isdir(output_directory):
+            os.makedirs(output_directory)
+            os.chmod(output_directory, 0o775)
+        shutil.copy2(args.config, output_directory)
 
     num_gpus = torch.cuda.device_count()
     if num_gpus > 1:

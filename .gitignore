@@ -1,0 +1,10 @@
+.vscode
+__pycache__
+checkpoints*
+*.log*
+output*
+_history
+test*
+apex
+
+data_timit
