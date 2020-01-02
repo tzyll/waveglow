@@ -1,0 +1,15 @@
+{
+    "comments": "enhance the audio with BP on it by min the loss",
+
+    "train_config": {
+        "output_directory": "output_x_enhance",
+        "epochs": 100,
+        "learning_rate": 1e-4,
+        "sigma": 1.0,
+        "seed": 1234,
+        "checkpoint_path": "checkpoints_raw-audio/waveglow_148000"
+    },
+    "data_config": {
+        "training_files": "test_noise.scp"
+    }
+}

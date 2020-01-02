@@ -25,15 +25,15 @@
 ### Experiments
 
 1. Prepare wav.scp for "training_files" in config.json with format 'wav_id wav_path',
-   also a test.scp for test.
-
-2. Train a glow for raw audio without condition.
+   also a test.scp for test. Train a glow for raw audio without condition.
 
    ```command
    ./run_train.sh     # run_distributed.sh for multi GPUs.
    ./run_forward.sh   # get latent *z*.
    ./run_generate.sh  # generate wavs with the above *z*.
    ```
+
+2. Prepare a test_noise.scp containing noisy speech, `./run_enhance.sh` for enhancement.
 
 <br/>
 

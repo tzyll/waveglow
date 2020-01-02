@@ -31,9 +31,9 @@
     "waveglow_config": {
         "n_mel_channels": 80,
         "n_flows": 12,
-        "n_group": 40,
+        "n_group": 80,
         "n_early_every": 4,
-        "n_early_size": 10,
+        "n_early_size": 20,
         "WN_config": {
             "n_layers": 4,
             "n_channels": 128,
