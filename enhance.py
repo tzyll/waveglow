@@ -81,7 +81,7 @@ def train(output_directory, epochs, learning_rate,
             audio_new = audio_new.cpu().detach().numpy()
             audio_new = audio_new.astype('int16')
             audio_path = os.path.join(
-                output_directory, "{}_enhance{}.wav".format(file_name, epoch))
+                output_directory, "{}_lr{}_ep{}.wav".format(file_name, learning_rate, epoch))
             write(audio_path, sampling_rate, audio_new)
             print(audio_path)
 
