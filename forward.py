@@ -30,6 +30,7 @@ import torch
 from mel2samp import scp_files_to_list, MAX_WAV_VALUE, load_wav_to_torch
 from denoiser import Denoiser
 import matplotlib.pyplot as plt
+from glow import WaveGlowLoss
 
 
 def main(wav_scp, waveglow_path, sigma, output_dir, sampling_rate, is_fp16,
@@ -45,6 +46,8 @@ def main(wav_scp, waveglow_path, sigma, output_dir, sampling_rate, is_fp16,
     if denoiser_strength > 0:
         denoiser = Denoiser(waveglow).cuda()
 
+    criterion = WaveGlowLoss(sigma)
+
     z_all = []
     for _, file_scp in enumerate(wav_scp):
         file_name, file_path = file_scp
@@ -54,6 +57,11 @@ def main(wav_scp, waveglow_path, sigma, output_dir, sampling_rate, is_fp16,
         audio = audio / MAX_WAV_VALUE  # trained with norm
         with torch.no_grad():
             z = waveglow.forward(audio)
+        
+        loss = criterion(z, details=True)
+        print("{} loss, log_p_z, log_det: \t{:.9f}, {:.9f}, {:.9f}".format(file_name, 
+            loss[0].item(), loss[1].item(), loss[2].item()))
+
         z_path = os.path.join(output_dir, "{}_z".format(file_name))
         torch.save(z[0], z_path)
         print(z_path)

@@ -124,21 +124,22 @@ def train(num_gpus, rank, group_name, output_directory, epochs, learning_rate,
             audio = torch.autograd.Variable(audio.cuda())
             outputs = model(audio)
 
-            loss = criterion(outputs)
+            loss = criterion(outputs, details=True)
             if num_gpus > 1:
-                reduced_loss = reduce_tensor(loss.data, num_gpus).item()
+                reduced_loss = reduce_tensor(loss[0].data, num_gpus).item()
             else:
-                reduced_loss = loss.item()
+                reduced_loss = loss[0].item()
 
             if fp16_run:
-                with amp.scale_loss(loss, optimizer) as scaled_loss:
+                with amp.scale_loss(loss[0], optimizer) as scaled_loss:
                     scaled_loss.backward()
             else:
-                loss.backward()
+                loss[0].backward()
 
             optimizer.step()
 
-            print("{}:\t{:.9f}".format(iteration, reduced_loss))
+            print("{} loss, log_p_z, log_det: \t{:.9f}, {:.9f}, {:.9f}".format(iteration, 
+                reduced_loss, loss[1].item(), loss[2].item()))  # loss 1,2 not reduced
             if with_tensorboard and rank == 0:
                 logger.add_scalar('training_loss', reduced_loss, i + len(train_loader) * epoch)
 

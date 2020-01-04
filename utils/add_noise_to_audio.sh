@@ -32,7 +32,7 @@ snr=0
 output=$dir/${input%.wav*}_kaldi_noise_snr$snr.wav
 id=${input%.wav*}_kaldi_noise_snr$snr
 noise=/nfs/corpus0/data/corpora/database/acoustic/noise/musan/noise/free-sound/noise-free-sound-0089.wav
-$tool --shift-output=true --additive-signals="sox -t wav $noise -r 16k -t wav - |" --start-times='0' --snrs='$snr' $input $output
+$tool --shift-output=true --additive-signals="sox -t wav $noise -r 16k -t wav - |" --start-times='0' --snrs="$snr" $input $output
 echo $id $output >> test_noise.scp
 echo "====> $output"
 
@@ -41,7 +41,7 @@ snr=5
 output=$dir/${input%.wav*}_kaldi_music_snr$snr.wav
 id=${input%.wav*}_kaldi_music_snr$snr
 noise=/nfs/corpus0/data/corpora/database/acoustic/noise/musan/music/jamendo/music-jamendo-0129.wav
-$tool --shift-output=true --additive-signals="sox -t wav $noise -r 16k -t wav - |" --start-times='0' --snrs='$snr' $input $output
+$tool --shift-output=true --additive-signals="sox -t wav $noise -r 16k -t wav - |" --start-times='0' --snrs="$snr" $input $output
 echo $id $output >> test_noise.scp
 echo "====> $output"
 
@@ -50,6 +50,6 @@ snr=15
 output=$dir/${input%.wav*}_kaldi_babble_snr$snr.wav
 id=${input%.wav*}_kaldi_babble_snr$snr
 noise=/nfs/corpus0/data/corpora/database/acoustic/noise/musan/speech/us-gov/speech-us-gov-0220.wav
-$tool --shift-output=true --additive-signals="sox -t wav $noise -r 16k -t wav - |" --start-times='0' --snrs='$snr' $input $output
+$tool --shift-output=true --additive-signals="sox -t wav $noise -r 16k -t wav - |" --start-times='0' --snrs="$snr" $input $output
 echo $id $output >> test_noise.scp
 echo "====> $output"

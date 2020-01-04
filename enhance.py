@@ -66,9 +66,10 @@ def train(output_directory, epochs, learning_rate,
             model.zero_grad()
             outputs = model(audio)
 
-            loss = criterion(outputs)
-            loss.backward()
-            print("Epoch {}:\t{:.9f}".format(epoch, loss.item()))
+            loss = criterion(outputs, details=True)
+            loss[0].backward()
+            print("Epoch {} loss, log_p_z, log_det: \t{:.9f}, {:.9f}, {:.9f}".format(
+                epoch, loss[0].item(), loss[1].item(), loss[2].item()))
 
             # optimizer.step() not needed actually, update input manually
             with torch.no_grad():

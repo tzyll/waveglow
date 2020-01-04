@@ -45,7 +45,7 @@ class WaveGlowLoss(torch.nn.Module):
         super(WaveGlowLoss, self).__init__()
         self.sigma = sigma
 
-    def forward(self, model_output):
+    def forward(self, model_output, details=False):
         z, log_s_list, log_det_W_list = model_output
         for i, log_s in enumerate(log_s_list):
             if i == 0:
@@ -55,8 +55,14 @@ class WaveGlowLoss(torch.nn.Module):
                 log_s_total = log_s_total + torch.sum(log_s)
                 log_det_W_total += log_det_W_list[i]
 
-        loss = torch.sum(z*z)/(2*self.sigma*self.sigma) - log_s_total - log_det_W_total
-        return loss/(z.size(0)*z.size(1)*z.size(2))
+        log_p_z = torch.sum(z*z)/(-2*self.sigma*self.sigma)
+        log_det = log_s_total + log_det_W_total
+        loss = (-1) * (log_p_z + log_det)
+        size = z.size(0)*z.size(1)*z.size(2)
+        if details:
+            return loss/size, log_p_z/size, log_det/size
+        else:
+            return loss/size
 
 
 class Invertible1x1Conv(torch.nn.Module):
