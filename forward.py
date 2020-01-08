@@ -69,7 +69,7 @@ def main(wav_scp, waveglow_path, sigma, output_dir, sampling_rate, is_fp16,
 
     z_all_a = torch.cat(z_all, 2)
     plt.plot(z_all_a[0, 0, :].cpu().numpy(), z_all_a[0, 1, :].cpu().numpy(), 'r.')
-    z_fig_path = os.path.join(output_dir, "{}.jpg".format("z_dim-1-2"))
+    z_fig_path = os.path.join(output_dir, "{}.pdf".format("z_dim-1-2"))
     plt.savefig(z_fig_path)
     print(z_fig_path)
 

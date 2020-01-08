@@ -24,16 +24,21 @@
 
 ### Experiments
 
-1. Prepare wav.scp for "training_files" in config.json with format 'wav_id wav_path',
+1. Prepare wav.scp for "training_files" in config.json with Kaldi format 'wav_id wav_path',
    also a test.scp for test. Train a glow for raw audio without condition.
 
    ```command
    ./run_train.sh     # run_distributed.sh for multi GPUs.
    ./run_forward.sh   # get latent *z*.
-   ./run_generate.sh  # generate wavs with the above *z*.
+   ./run_inverse.sh   # generate wavs with the above *z*.
    ```
 
-2. Prepare a test_noise.scp containing noisy speech, `./run_enhance.sh` for enhancement.
+2. Prepare a test_noise.scp containing noisy speech, then do enhancement.
+
+   ```
+   utils/add_noise_to_audio.sh test.wav  # the noise inside needs to be specified.
+   ./run_enhance.sh
+   ```
 
 <br/>
 

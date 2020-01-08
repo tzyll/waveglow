@@ -3,7 +3,7 @@
 
     "train_config": {
         "output_directory": "output_x_enhance",
-        "epochs": 100,
+        "epochs": 1000,
         "learning_rate": 1e-4,
         "sigma": 1.0,
         "seed": 1234,

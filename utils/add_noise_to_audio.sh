@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ $# != 1 ]; then
+  echo "Usage: $0 test.wav"
+  exit 1
+fi
+
 input=$1
 dir=test_noise
 mkdir -p $dir
@@ -53,3 +58,5 @@ noise=/nfs/corpus0/data/corpora/database/acoustic/noise/musan/speech/us-gov/spee
 $tool --shift-output=true --additive-signals="sox -t wav $noise -r 16k -t wav - |" --start-times='0' --snrs="$snr" $input $output
 echo $id $output >> test_noise.scp
 echo "====> $output"
+
+echo "== See test_noise.scp =="
