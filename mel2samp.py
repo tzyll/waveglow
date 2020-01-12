@@ -126,6 +126,7 @@ class GetWavs(torch.utils.data.Dataset):
         self.audio_files = scp_files_to_list(training_files)
         random.seed(1234)
         random.shuffle(self.audio_files)
+        self.segment_length = segment_length
         self.sampling_rate = sampling_rate
 
     def __getitem__(self, index):
@@ -136,13 +137,13 @@ class GetWavs(torch.utils.data.Dataset):
             raise ValueError("{} SR doesn't match target {} SR".format(
                 sampling_rate, self.sampling_rate))
 
-        ## Take segment
-        #if audio.size(0) >= self.segment_length:
-        #    max_audio_start = audio.size(0) - self.segment_length
-        #    audio_start = random.randint(0, max_audio_start)
-        #    audio = audio[audio_start:audio_start+self.segment_length]
-        #else:
-        #    audio = torch.nn.functional.pad(audio, (0, self.segment_length - audio.size(0)), 'constant').data
+        # Take segment
+        if audio.size(0) >= self.segment_length:
+            max_audio_start = audio.size(0) - self.segment_length
+            audio_start = random.randint(0, max_audio_start)
+            audio = audio[audio_start:audio_start+self.segment_length]
+        else:
+            audio = torch.nn.functional.pad(audio, (0, self.segment_length - audio.size(0)), 'constant').data
 
         audio = audio / MAX_WAV_VALUE
         return audio
